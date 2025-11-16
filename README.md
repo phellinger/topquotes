@@ -7,12 +7,28 @@ A voting website similar to Naval 25, where users can vote for their favorite qu
 - **Ranked View**: See all quotes ranked by vote count
 - **Quiz Mode**: Pick your favorite between 2 random quotes
 - **Search Mode**: Search through quotes and vote
-- **Vote Tracking**: 25 votes per session (stored in localStorage)
+- **Vote Tracking**: 5 votes per session (stored in localStorage)
 - **Real-time Updates**: Vote counts update immediately
 
 ## Setup
 
-### Using Docker (Recommended - No local npm install needed)
+### Using Make Commands (Easiest)
+
+```bash
+# Start the application
+make start
+
+# Stop the application
+make stop
+
+# View logs
+make logs
+
+# See all available commands
+make help
+```
+
+### Using Docker Compose (Alternative)
 
 1. Build and run with Docker Compose:
 
@@ -57,6 +73,7 @@ http://localhost:3000
 
 ```
 topquotes/
+├── Makefile             # Make commands for easy management
 ├── Dockerfile           # Docker configuration
 ├── docker-compose.yml   # Docker Compose configuration
 ├── quotes.json.example  # Template with initial quotes (committed to git)

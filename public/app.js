@@ -1,5 +1,5 @@
 const API_BASE = '/api/quotes';
-const MAX_VOTES = 25;
+const MAX_VOTES = 5;
 
 let quotes = [];
 let votesLeft = MAX_VOTES;
@@ -18,7 +18,8 @@ function loadVoteState() {
     const saved = localStorage.getItem('voteState');
     if (saved) {
         const state = JSON.parse(saved);
-        votesLeft = state.votesLeft || MAX_VOTES;
+        // Cap votesLeft at MAX_VOTES in case it was saved with an old higher value
+        votesLeft = Math.min(state.votesLeft || MAX_VOTES, MAX_VOTES);
         votedQuotes = new Set(state.votedQuotes || []);
     }
     updateVotesLeft();

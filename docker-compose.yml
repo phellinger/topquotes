@@ -6,13 +6,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # Use a named volume for persistence across container restarts
-      # For local development with file access, use: ./quotes.json:/app/quotes.json
-      - quotes-data:/app/data
-    environment:
-      - QUOTES_FILE=/app/data/quotes.json
+      # Use bind mount to sync with local quotes.json file
+      - ./quotes.json:/app/quotes.json
     restart: unless-stopped
-
-volumes:
-  quotes-data:
 
