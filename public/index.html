@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Quotes - Vote for Your Favorites</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Top Quotes</h1>
+            <p class="subtitle">Vote for your favorite quotes</p>
+        </header>
+
+        <div class="vote-info">
+            <span id="votes-left">25</span> votes left
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="ranked">Ranked</button>
+            <button class="tab-btn" data-tab="quiz">Quiz</button>
+            <button class="tab-btn" data-tab="search">Search</button>
+        </div>
+
+        <!-- Ranked View -->
+        <div id="ranked-view" class="tab-content active">
+            <div id="quotes-list" class="quotes-list"></div>
+        </div>
+
+        <!-- Quiz View -->
+        <div id="quiz-view" class="tab-content">
+            <div class="quiz-container">
+                <p class="quiz-instruction">Pick your favorite quote:</p>
+                <div id="quiz-quotes" class="quiz-quotes"></div>
+            </div>
+        </div>
+
+        <!-- Search View -->
+        <div id="search-view" class="tab-content">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search quotes..." class="search-input">
+                <div id="search-results" class="search-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
