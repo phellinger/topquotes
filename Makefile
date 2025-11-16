@@ -12,8 +12,9 @@ start: ## Start the application
 stop: ## Stop the application
 	docker-compose down
 
-restart: ## Restart the application
-	docker-compose restart
+restart: ## Restart the application (stop and start)
+	docker-compose down
+	docker-compose up -d --build
 
 build: ## Build the Docker image
 	docker-compose build
