@@ -1,4 +1,4 @@
-.PHONY: help start stop restart build logs clean reset-votes
+.PHONY: help start stop restart build logs clean reset-votes format
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -39,4 +39,13 @@ reset-votes: ## Reset all votes to 0 (requires confirmation)
 	@read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
 	@python3 -c "import json; data = json.load(open('quotes.json')); [q.update({'votes': 0}) for q in data]; json.dump(data, open('quotes.json', 'w'), indent=2)"
 	@echo "All votes have been reset to 0"
+
+format: ## Remove trailing whitespaces from all files
+	@echo "Removing trailing whitespaces..."
+	@find . -type f \( -name "*.js" -o -name "*.html" -o -name "*.css" -o -name "*.json" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" -o -name "Makefile" -o -name "*.sh" \) \
+		! -path "./node_modules/*" \
+		! -path "./.git/*" \
+		! -name "package-lock.json" \
+		-exec sed -i '' 's/[[:space:]]*$$//' {} \;
+	@echo "Trailing whitespaces removed"
 

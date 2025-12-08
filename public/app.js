@@ -46,11 +46,11 @@ function setupTabs() {
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
-            
+
             // Update active states
             tabBtns.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
-            
+
             btn.classList.add('active');
             document.getElementById(`${tabName}-view`).classList.add('active');
 
@@ -80,7 +80,7 @@ async function loadQuotes() {
 // Display quotes in ranked view
 function displayQuotes(quotesToShow) {
     const container = document.getElementById('quotes-list');
-    
+
     if (quotesToShow.length === 0) {
         container.innerHTML = '<div class="empty-state">No quotes found</div>';
         return;
@@ -97,8 +97,8 @@ function displayQuotes(quotesToShow) {
                 <div class="quote-text">${quote.text}</div>
                 <div class="quote-meta">
                     <div class="quote-votes">${quote.votes} votes</div>
-                    <button class="vote-btn" 
-                            data-id="${quote.id}" 
+                    <button class="vote-btn"
+                            data-id="${quote.id}"
                             ${canVote ? '' : 'disabled'}>
                         ${canVote ? 'Vote' : 'Voted'}
                     </button>
@@ -116,11 +116,26 @@ function displayQuotes(quotesToShow) {
     });
 }
 
-// Load quiz (2 random quotes)
+// Load quiz (2 random quotes that haven't been voted for)
 async function loadQuiz() {
     try {
-        const response = await fetch(`${API_BASE}/quiz`);
-        const quizQuotes = await response.json();
+        // Get all quotes to filter out voted ones
+        const allQuotesResponse = await fetch(API_BASE);
+        const allQuotes = await allQuotesResponse.json();
+
+        // Filter out quotes that have already been voted for
+        const availableQuotes = allQuotes.filter(quote => !votedQuotes.has(quote.id));
+
+        if (availableQuotes.length < 2) {
+            const container = document.getElementById('quiz-quotes');
+            container.innerHTML = '<div class="empty-state">Not enough unvoted quotes for quiz. You have already voted on most quotes!</div>';
+            return;
+        }
+
+        // Shuffle and pick 2 random quotes from available (non-voted) quotes
+        const shuffled = [...availableQuotes].sort(() => 0.5 - Math.random());
+        const quizQuotes = shuffled.slice(0, 2);
+
         displayQuiz(quizQuotes);
     } catch (error) {
         console.error('Error loading quiz:', error);
@@ -130,20 +145,20 @@ async function loadQuiz() {
 // Display quiz quotes
 function displayQuiz(quizQuotes) {
     const container = document.getElementById('quiz-quotes');
-    
+
     if (quizQuotes.length < 2) {
         container.innerHTML = '<div class="empty-state">Not enough quotes for quiz</div>';
         return;
     }
 
+    // All quotes in quizQuotes are already filtered to be non-voted, so all can be voted on
     container.innerHTML = quizQuotes.map(quote => {
-        const canVote = votesLeft > 0 && !votedQuotes.has(quote.id);
+        const canVote = votesLeft > 0; // All quotes shown are non-voted, so can vote if votes left
         return `
-            <div class="quiz-quote" 
+            <div class="quiz-quote"
                  data-id="${quote.id}"
                  ${canVote ? 'style="cursor: pointer;"' : 'style="opacity: 0.6; cursor: not-allowed;"'}>
                 <div class="quiz-quote-text">${quote.text}</div>
-                ${!canVote ? '<div style="margin-top: 10px; color: #999;">Already voted</div>' : ''}
             </div>
         `;
     }).join('');
@@ -151,8 +166,8 @@ function displayQuiz(quizQuotes) {
     // Add event listeners
     container.querySelectorAll('.quiz-quote').forEach(quoteEl => {
         const quoteId = parseInt(quoteEl.dataset.id);
-        const canVote = votesLeft > 0 && !votedQuotes.has(quoteId);
-        
+        const canVote = votesLeft > 0; // All quotes are non-voted
+
         if (canVote) {
             quoteEl.addEventListener('click', () => {
                 voteForQuote(quoteId);
@@ -194,7 +209,7 @@ async function searchQuotes(query) {
 // Display search results
 function displaySearchResults(results) {
     const container = document.getElementById('search-results');
-    
+
     if (results.length === 0) {
         container.innerHTML = '<div class="empty-state">No quotes found</div>';
         return;
@@ -210,8 +225,8 @@ function displaySearchResults(results) {
                 <div class="search-quote-text">${quote.text}</div>
                 <div class="quote-meta">
                     <div class="search-quote-votes">${quote.votes} votes</div>
-                    <button class="vote-btn" 
-                            data-id="${quote.id}" 
+                    <button class="vote-btn"
+                            data-id="${quote.id}"
                             ${canVote ? '' : 'disabled'}>
                         ${canVote ? 'Vote' : 'Voted'}
                     </button>
@@ -254,7 +269,7 @@ async function voteForQuote(quoteId) {
         }
 
         const result = await response.json();
-        
+
         // Update local state
         votesLeft--;
         votedQuotes.add(quoteId);
