@@ -1,17 +1,51 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const session = require('express-session');
 const fs = require('fs').promises;
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MAX_VOTES_PER_SESSION = 5;
 const QUOTES_FILE =
   process.env.QUOTES_FILE || path.join(__dirname, 'quotes.json');
 const QUOTES_EXAMPLE = path.join(__dirname, 'quotes.json.example');
 
-app.use(cors());
+// Configure CORS to allow credentials (cookies)
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.static('public'));
+
+// Session configuration
+app.use(
+  session({
+    secret:
+      process.env.SESSION_SECRET || 'topquotes-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: false, // Set to true if using HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Rate limiting for voting - allows 20 votes per minute (generous for normal use)
+const voteLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // 20 votes per minute - allows normal clicking but prevents spam
+  message: { error: 'Too many votes, please slow down' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Initialize quotes.json from example if it doesn't exist
 async function initializeQuotesFile() {
@@ -107,10 +141,47 @@ app.get('/api/quotes/search', async (req, res) => {
   }
 });
 
-// Vote for a quote
-app.post('/api/quotes/:id/vote', async (req, res) => {
+// Get current session vote status
+app.get('/api/session/votes', (req, res) => {
+  const sessionVotes = req.session.votedQuotes || [];
+  const votesLeft = Math.max(0, MAX_VOTES_PER_SESSION - sessionVotes.length);
+
+  res.json({
+    votesLeft: votesLeft,
+    totalVotes: sessionVotes.length,
+    votedQuotes: sessionVotes,
+  });
+});
+
+// Vote for a quote (with rate limiting and server-side session tracking)
+app.post('/api/quotes/:id/vote', voteLimiter, async (req, res) => {
   try {
     const quoteId = parseInt(req.params.id);
+
+    // Initialize session vote tracking if not exists
+    if (!req.session.votedQuotes) {
+      req.session.votedQuotes = [];
+    }
+
+    // Server-side check: Has user already voted for this quote?
+    if (req.session.votedQuotes.includes(quoteId)) {
+      return res.status(400).json({
+        error: 'You have already voted for this quote',
+        votesLeft: Math.max(
+          0,
+          MAX_VOTES_PER_SESSION - req.session.votedQuotes.length
+        ),
+      });
+    }
+
+    // Server-side check: Has user exceeded vote limit?
+    if (req.session.votedQuotes.length >= MAX_VOTES_PER_SESSION) {
+      return res.status(400).json({
+        error: 'You have reached the maximum number of votes',
+        votesLeft: 0,
+      });
+    }
+
     const quotes = await readQuotes();
     const quote = quotes.find((q) => q.id === quoteId);
 
@@ -118,10 +189,24 @@ app.post('/api/quotes/:id/vote', async (req, res) => {
       return res.status(404).json({ error: 'Quote not found' });
     }
 
+    // Record the vote in the session
+    req.session.votedQuotes.push(quoteId);
+
+    // Update quote votes
     quote.votes += 1;
     await writeQuotes(quotes);
 
-    res.json({ success: true, votes: quote.votes });
+    const votesLeft = Math.max(
+      0,
+      MAX_VOTES_PER_SESSION - req.session.votedQuotes.length
+    );
+
+    res.json({
+      success: true,
+      votes: quote.votes,
+      votesLeft: votesLeft,
+      totalVotes: req.session.votedQuotes.length,
+    });
   } catch (error) {
     res.status(500).json({ error: 'Failed to vote' });
   }
