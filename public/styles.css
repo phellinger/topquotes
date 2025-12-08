@@ -124,11 +124,25 @@ header h1 {
     gap: 15px;
 }
 
+.quote-rank-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 60px;
+}
+
+.quote-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
 .quote-rank {
     font-size: 1.2em;
     font-weight: 700;
     color: #C85A3A;
-    min-width: 40px;
 }
 
 .quote-votes {

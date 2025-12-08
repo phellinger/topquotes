@@ -90,7 +90,10 @@ function displayQuotes(quotesToShow) {
         const canVote = votesLeft > 0 && !votedQuotes.has(quote.id);
         return `
             <div class="quote-item">
-                <div class="quote-rank">#${index + 1}</div>
+                <div class="quote-rank-container">
+                    <img src="favicon.png" alt="Quote icon" class="quote-icon">
+                    <div class="quote-rank">#${index + 1}</div>
+                </div>
                 <div class="quote-text">${quote.text}</div>
                 <div class="quote-meta">
                     <div class="quote-votes">${quote.votes} votes</div>
@@ -201,6 +204,9 @@ function displaySearchResults(results) {
         const canVote = votesLeft > 0 && !votedQuotes.has(quote.id);
         return `
             <div class="search-quote">
+                <div class="quote-rank-container">
+                    <img src="favicon.png" alt="Quote icon" class="quote-icon">
+                </div>
                 <div class="search-quote-text">${quote.text}</div>
                 <div class="quote-meta">
                     <div class="search-quote-votes">${quote.votes} votes</div>
