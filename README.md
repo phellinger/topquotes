@@ -40,13 +40,13 @@ Or using Docker directly:
 
 ```bash
 docker build -t topquotes .
-docker run -p 3000:3000 -v $(pwd)/quotes.json:/app/quotes.json topquotes
+docker run -p 3671:3671 -v $(pwd)/quotes.json:/app/quotes.json topquotes
 ```
 
 2. Open your browser and navigate to:
 
 ```
-http://localhost:3000
+http://localhost:3671
 ```
 
 ### Local Setup (Alternative)
@@ -66,7 +66,7 @@ npm start
 3. Open your browser and navigate to:
 
 ```
-http://localhost:3000
+http://localhost:3671
 ```
 
 ## Project Structure

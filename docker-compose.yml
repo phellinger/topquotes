@@ -4,7 +4,7 @@ services:
   web:
     build: .
     ports:
-      - "3000:3000"
+      - "3671:3671"
     volumes:
       # Use bind mount to sync with local quotes.json file
       - ./quotes.json:/app/quotes.json

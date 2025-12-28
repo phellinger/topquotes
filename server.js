@@ -6,7 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3671;
 const MAX_VOTES_PER_SESSION = 5;
 const QUOTES_FILE =
   process.env.QUOTES_FILE || path.join(__dirname, 'quotes.json');
